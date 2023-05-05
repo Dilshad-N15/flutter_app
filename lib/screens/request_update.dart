@@ -187,12 +187,14 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    print("xxxxxxxxx");
     print(widget.dSnap['description']);
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
-          leading: Icon(CupertinoIcons.back),
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Icon(CupertinoIcons.back),
+          ),
           title: Text('Ask for help'),
         ),
         backgroundColor: Colors.black,
@@ -382,9 +384,12 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
                             child: GestureDetector(
                               onTap: () {
                                 updateFile();
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) => HomeScreen(),
+                                Navigator.of(context)
+                                    .popUntil((route) => route.isFirst);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Request Updated 👍'),
+                                    duration: Duration(seconds: 2),
                                   ),
                                 );
                               },

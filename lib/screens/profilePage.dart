@@ -97,23 +97,25 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                         height: 300.0,
                         width: 300.0,
                         child: Container(
+                          margin: EdgeInsets.all(20),
+                          height: 150.0,
+                          width: 150.0,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF2C74B3).withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Container(
                             margin: EdgeInsets.all(20),
-                            height: 150.0,
-                            width: 150.0,
-                            decoration: BoxDecoration(
-                              color: Color(0xFF2C74B3).withOpacity(0.2),
-                              shape: BoxShape.circle,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: SvgPicture.network(
+                                'https://avatars.dicebear.com/api/identicon/${widget.mentorID}.svg',
+                                width: 75,
+                                height: 75,
+                              ),
                             ),
-                            child: Container(
-                              margin: EdgeInsets.all(20),
-                              child: CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  child: SvgPicture.network(
-                                    'https://avatars.dicebear.com/api/identicon/${widget.mentorID}.svg',
-                                    width: 75,
-                                    height: 75,
-                                  )),
-                            )),
+                          ),
+                        ),
                       ),
                     ),
                   ),

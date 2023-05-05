@@ -1,8 +1,11 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mentor_mind/screens/profile.dart';
 import 'package:mentor_mind/screens/profilePage.dart';
 
 class Comment {
@@ -163,55 +166,185 @@ class ApplicantBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Container(
-        color: Colors.black54,
-        child: ListTile(
-          leading: const Icon(CupertinoIcons.person_crop_circle),
-          title: Row(
-            children: [
-              Text(dSnap['name']),
-              SizedBox(
-                width: 10,
-              ),
-              GestureDetector(
-                onTap: () => showModalBottomSheet(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    context: context,
-                    builder: (context) {
-                      return CommentModalSheet(
-                        topic: topic,
-                        mentorID: dSnap['uid'],
-                      );
-                    }),
-                child: Text('4.0  ⭐'),
+        height: 80,
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+            color: Color.fromARGB(255, 153, 152, 152),
+            borderRadius: BorderRadius.circular(8)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 49, 49, 49),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 4,
+                color: Color(0xFFBCCEF8),
               ),
             ],
           ),
-          subtitle: Text(dSnap['email']),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  assignMentor();
-                  // Navigator.of(context).push(
-                  //     MaterialPageRoute(builder: (_) => ProfilePageNew()));
-                },
-                child: const Icon(
-                  CupertinoIcons.square_arrow_right_fill,
-                  color: Colors.green,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                            backgroundColor: Color.fromARGB(255, 224, 223, 223),
+                            child: Container(
+                              height: 20,
+                              width: 20,
+                              child: SvgPicture.network(
+                                'https://avatars.dicebear.com/api/identicon/${dSnap["name"]}.svg',
+                              ),
+                            ))
+                      ],
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                            dSnap['name'],
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                            width: 150,
+                            child: Text(
+                              dSnap['email'],
+                              style: const TextStyle(fontSize: 12),
+                            )),
+                        SizedBox(
+                            width: 150,
+                            child: GestureDetector(
+                              onTap: () => showModalBottomSheet(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  context: context,
+                                  builder: (context) {
+                                    return CommentModalSheet(
+                                      topic: topic,
+                                      mentorID: dSnap['uid'],
+                                    );
+                                  }),
+                              child: Text(
+                                'view comments',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-            ],
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        assignMentor();
+                        Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => ProfilePage()));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Assigned as mentor 👍'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        CupertinoIcons.arrowshape_turn_up_right_circle_fill,
+                        color: Colors.green[300],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (_) => Player(
+                        //       pageNumber: index,
+                        //       book: widget.book,
+                        //     ),
+                        //   ),
+                        // );
+                      },
+                      icon: Icon(
+                        CupertinoIcons.delete,
+                        color: Colors.red[300],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+
+    // Padding(
+    //   padding: EdgeInsets.all(8.0),
+    //   child: Container(
+    //     color: Colors.black54,
+    //     child: ListTile(
+    //       leading: const Icon(CupertinoIcons.person_crop_circle),
+    //       title: Row(
+    //         children: [
+    //           Text(dSnap['name']),
+    //           SizedBox(
+    //             width: 10,
+    //           ),
+    //           GestureDetector(
+    //             onTap: () => showModalBottomSheet(
+    //                 shape: RoundedRectangleBorder(
+    //                     borderRadius: BorderRadius.circular(10)),
+    //                 context: context,
+    //                 builder: (context) {
+    //                   return CommentModalSheet(
+    //                     topic: topic,
+    //                     mentorID: dSnap['uid'],
+    //                   );
+    //                 }),
+    //             child: Text('4.0  ⭐'),
+    //           ),
+    //         ],
+    //       ),
+    //       subtitle: Text(dSnap['email']),
+    //       trailing: Row(
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: [
+    //           GestureDetector(
+    //             onTap: () {
+    //               assignMentor();
+    //               // Navigator.of(context).push(
+    //               //     MaterialPageRoute(builder: (_) => ProfilePageNew()));
+    //             },
+    //             child: const Icon(
+    //               CupertinoIcons.square_arrow_right_fill,
+    //               color: Colors.green,
+    //             ),
+    //           ),
+    //           const SizedBox(
+    //             width: 15,
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
 

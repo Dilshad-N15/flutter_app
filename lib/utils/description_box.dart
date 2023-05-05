@@ -1,10 +1,11 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
 class DescriptionBox extends StatelessWidget {
-  const DescriptionBox({super.key});
+  DescriptionBox({super.key, required this.description});
+  String description;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class DescriptionBox extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'I need to do my flutter project. So i am looking for students with flutter experience in projects.',
+                      description,
                     )
                   ],
                 ),

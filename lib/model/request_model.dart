@@ -15,18 +15,18 @@ class Request {
   final DateTime datetime;
   static List<String> types = [
     'All',
-    'Physics',
-    'DS',
-    'Maths',
-    'Chemisty',
+    'Flutter',
+    'React JS',
+    'Algorithms',
+    'DL',
     'ML',
     'Others',
   ];
   static List<String> topics = [
-    'Physics',
-    'DS',
-    'Maths',
-    'Chemisty',
+    'Flutter',
+    'React JS',
+    'Algorithms',
+    'DL',
     'ML',
     'Others',
   ];

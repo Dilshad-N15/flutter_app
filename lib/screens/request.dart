@@ -27,15 +27,7 @@ class _RequestPageState extends State<RequestPage> {
     DocumentSnapshot userSnapshot =
         await _firestore.collection('users').doc(user.uid).get();
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
-    print("sssssssssssssssssssssssssss");
-    print(userSnapshot.data());
-
-    print("xxxxxxxxxxxxxxx");
     String name = userData['name'];
-
-    print("xxxxxxxxxxxxxxx");
-
-    print(name);
 
     Request request = Request(
       topic: _selectedSubject == 'Others'
@@ -52,9 +44,6 @@ class _RequestPageState extends State<RequestPage> {
     );
 
     try {
-      print('xxxxxxxxxx');
-      print(request.toJson());
-      print('xxxxxxxxxx');
       _firestore.collection('requests').doc(requestID).set(request.toJson());
     } catch (e) {
       print(e.toString());
@@ -197,7 +186,9 @@ class _RequestPageState extends State<RequestPage> {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
-          leading: Icon(CupertinoIcons.back),
+          leading: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(CupertinoIcons.back)),
           title: Text('Ask for help'),
         ),
         backgroundColor: Colors.black,
@@ -390,10 +381,16 @@ class _RequestPageState extends State<RequestPage> {
                                     builder: (context) => HomeScreen(),
                                   ),
                                 );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Request uploaded 👍'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
                               },
                               child: Center(
                                 child: Text(
-                                  'Next',
+                                  'Publish Request',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),

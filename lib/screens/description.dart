@@ -1,11 +1,11 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:mentor_mind/screens/homescreen.dart';
 import 'package:mentor_mind/utils/apply_box.dart';
 import 'package:mentor_mind/utils/category_box.dart';
@@ -53,73 +53,104 @@ class _DescriptionState extends State<Description> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Icon(
-            CupertinoIcons.back,
-          ),
-        ),
-        title: Text(
-          'Job Details',
-        ),
-        actions: [
-          Icon(
-            CupertinoIcons.person_crop_circle_fill,
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            RequestBox(
-              type: '',
-              dSnap: widget.dSnap,
-              col: Colors.primaries[Random().nextInt(
-                Colors.primaries.length,
-              )],
+    bool isApplied = false;
+    return FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance
+            .collection('requests')
+            .doc(widget.dSnap['requestID'])
+            .get(),
+        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+
+          if (data == null) {
+            return Text('User not found');
+          }
+          final applied = data['applicants'] as List<dynamic>;
+          final requestID = user.uid;
+          print(applied);
+          print(requestID);
+          isApplied = applied.contains(requestID);
+          print(isApplied);
+          return Scaffold(
+            backgroundColor: Colors.black,
+            appBar: AppBar(
+              elevation: 0,
+              leading: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(
+                  CupertinoIcons.back,
+                ),
+              ),
+              title: Text(
+                'Job Details',
+              ),
             ),
-            SizedBox(
-              height: 10,
-            ),
-            DescriptionBox(),
-            SizedBox(
-              height: 10,
-            ),
-            RequirementBox(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        height: 50,
-        width: double.infinity,
-        color: Colors.transparent,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // CategoryBox(name: 'Message'),
-            GestureDetector(
-              onTap: () {
-                applyToTeach();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomeScreen();
-                    },
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  RequestBox(
+                    type: '',
+                    dSnap: widget.dSnap,
+                    col: Colors.primaries[Random().nextInt(
+                      Colors.primaries.length,
+                    )],
                   ),
-                );
-              },
-              child: ApplyBox(name: 'Apply Now'),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  DescriptionBox(
+                    description: widget.dSnap['description'],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  RequirementBox(skill: widget.dSnap['topic']),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
+            bottomNavigationBar: Container(
+              height: 50,
+              width: double.infinity,
+              color: Colors.transparent,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // CategoryBox(name: 'Message'),
+                  isApplied
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: ApplyBox(name: 'Already applied'),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            applyToTeach();
+                            Navigator.of(context)
+                                .popUntil((route) => route.isFirst);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Request uploaded 👍'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: ApplyBox(name: 'Apply Now'),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

@@ -74,8 +74,11 @@ class Personal_RequestsViewState extends State<PersonalRequestsView> {
           return Container();
         }
         if (requestIDsOfUser.isEmpty) {
-          return Center(
-            child: Text('No requests found.'),
+          return Scaffold(
+            appBar: AppBar(),
+            body: Center(
+              child: Text('No requests found.'),
+            ),
           );
         }
         if (snapshot.connectionState == ConnectionState.done) {

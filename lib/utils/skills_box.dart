@@ -4,7 +4,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
 class RequirementBox extends StatelessWidget {
-  const RequirementBox({super.key});
+  RequirementBox({super.key, required this.skill});
+  String skill;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,7 @@ class RequirementBox extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(10),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
@@ -51,9 +53,7 @@ class RequirementBox extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
-                      'I need to do my flutter project. So i am looking for students with flutter experience in projects.',
-                    )
+                    Text(skill)
                   ],
                 ),
               ),

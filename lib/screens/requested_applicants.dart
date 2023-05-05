@@ -81,6 +81,5 @@ class _RequestedApplicantsPageState extends State<RequestedApplicantsPage> {
         );
       }),
     );
-    ;
   }
 }

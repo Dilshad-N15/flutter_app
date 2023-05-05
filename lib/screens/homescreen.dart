@@ -167,6 +167,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       itemBuilder:
                                           (BuildContext context, int index) {
                                         if (Request.types[index] != 'Others') {
+                                          print(
+                                              "creating for ${Request.types[index]}");
                                           return Container(
                                             margin: EdgeInsets.symmetric(
                                               horizontal: 10,
