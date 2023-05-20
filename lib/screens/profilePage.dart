@@ -1,15 +1,20 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mentor_mind/screens/chat_screen.dart';
 import 'package:mentor_mind/screens/rate.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:mentor_mind/.env';
 
 class ProfilePageNew extends StatefulWidget {
   ProfilePageNew(
@@ -28,7 +33,106 @@ class ProfilePageNew extends StatefulWidget {
 }
 
 class _ProfilePageNewState extends State<ProfilePageNew> {
+  calculateAmount(String amount) {
+    final calculatedAmout = (int.parse(amount)) * 100;
+    return calculatedAmout.toString();
+  }
+
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card'
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer $sk',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body,
+      );
+      // ignore: avoid_print
+      print('Payment Intent Body->>> ${response.body.toString()}');
+      return jsonDecode(response.body);
+    } catch (err) {
+      // ignore: avoid_print
+      print('err charging user: ${err.toString()}');
+    }
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet().then((value) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                          Text("Payment Successfull"),
+                        ],
+                      ),
+                    ],
+                  ),
+                ));
+        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => Rating(
+              type: widget.topic,
+              mentorID: widget.mentorID,
+            ),
+          ),
+        );
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        print('Error is:--->$error $stackTrace');
+      });
+    } on StripeException catch (e) {
+      print('Error is:---> $e');
+      showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+                content: Text("Cancelled "),
+              ));
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+  Future<void> makePayment() async {
+    try {
+      paymentIntent = await createPaymentIntent('500', 'INR');
+      //Payment Sheet
+      await Stripe.instance
+          .initPaymentSheet(
+              paymentSheetParameters: SetupPaymentSheetParameters(
+                  paymentIntentClientSecret: paymentIntent!['client_secret'],
+                  // applePay: const PaymentSheetApplePay(merchantCountryCode: '+92',),
+                  // googlePay: const PaymentSheetGooglePay(testEnv: true, currencyCode: "US", merchantCountryCode: "+92"),
+                  style: ThemeMode.dark,
+                  merchantDisplayName: 'Mentor Mind'))
+          .then((value) {});
+
+      ///now finally display payment sheeet
+      displayPaymentSheet();
+    } catch (e, s) {
+      print('exception:$e$s');
+    }
+  }
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Map<String, dynamic>? paymentIntent;
+
   final user = FirebaseAuth.instance.currentUser!;
 
   String chatRoomID(String user1, String user2) {
@@ -201,6 +305,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                           MaterialPageRoute(
                             builder: (_) => ChatScreen(
                               //i was here
+                              Mentorsnap: snap,
                               admin: widget.admin,
                               requestID: widget.requestID,
                               roomID: roomID,
@@ -251,16 +356,8 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        String roomID = chatRoomID(user.uid, widget.mentorID);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => Rating(
-                              type: widget.topic,
-                              mentorID: widget.mentorID,
-                            ),
-                          ),
-                        );
+                      onTap: () async {
+                        await makePayment();
                       },
                       child: Container(
                         height: 60,
