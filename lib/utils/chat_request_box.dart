@@ -12,11 +12,14 @@ class ChatRequestBox extends StatelessWidget {
   var dSnap;
 
   String chatRoomID(String user1, String user2) {
+    print('being triggered');
+    String x = dSnap['requestID'].replaceAll("-", "");
+
     if (user1[0].toLowerCase().codeUnits[0] >
         user2[0].toLowerCase().codeUnits[0]) {
-      return "$user1$user2";
+      return "$user1$user2$x";
     } else {
-      return "$user2$user1";
+      return "$user2$user1$x";
     }
   }
 
@@ -39,6 +42,8 @@ class ChatRequestBox extends StatelessWidget {
             final DateTime dateTime = timestamp.toDate();
             final int difference =
                 DateTime.now().difference(dateTime).inMinutes;
+            print("difference");
+            print(difference);
 
             return GestureDetector(
               onTap: () {
@@ -46,7 +51,7 @@ class ChatRequestBox extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ChatScreen(
-                      admin: 0,
+                      admin: false,
                       requestID: '',
                       roomID: roomID,
                       mentorID: dSnap['mentor'],
@@ -158,12 +163,19 @@ class ChatRequestBox extends StatelessWidget {
                                                   color: Colors.black,
                                                 ),
                                               )
-                                            : Text(
-                                                'Posted ${(difference / 30).toInt()} hours ago',
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                ),
-                                              )
+                                            : difference < 1440
+                                                ? Text(
+                                                    'Posted ${(difference / 30).toInt()} hours ago',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    'Posted ${(difference ~/ (24 * 60)).toInt()} days ago',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  )
                                       ],
                                     ),
                                   ),

@@ -7,9 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class GroupMembers extends StatefulWidget {
-  const GroupMembers(
-      {super.key, required this.roomID, required this.requestID});
+  const GroupMembers({
+    super.key,
+    required this.roomID,
+    required this.requestID,
+    required this.isAdmin,
+  });
   final String roomID;
+  final bool isAdmin;
   final String requestID;
 
   @override
@@ -134,18 +139,20 @@ class _GroupMembersState extends State<GroupMembers> {
             child: Container(
               margin:
                   const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: CupertinoSearchTextField(
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-                padding: EdgeInsets.all(15),
-                onSubmitted: (value) {
-                  print("searched");
-                  onSearch(value.trim());
-                },
-                borderRadius: BorderRadius.circular(10.0),
-                placeholder: 'Search names',
-              ),
+              child: widget.isAdmin
+                  ? CupertinoSearchTextField(
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      padding: EdgeInsets.all(15),
+                      onSubmitted: (value) {
+                        print("searched");
+                        onSearch(value.trim());
+                      },
+                      borderRadius: BorderRadius.circular(10.0),
+                      placeholder: 'Search names',
+                    )
+                  : Container(),
             ),
           ),
           Expanded(
@@ -241,7 +248,8 @@ class _GroupMembersState extends State<GroupMembers> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(userData['name']),
-                groupMembers[index].toString() == user.uid
+                // groupMembers[index].toString() == user.uid
+                !widget.isAdmin
                     ? Container()
                     : GestureDetector(
                         onTap: () {

@@ -43,6 +43,7 @@ class RequestBoxWithEdit extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => ProfilePageNew(
+                      admin: true,
                       topic: dSnap['topic'],
                       mentorID: dSnap['mentor'],
                       requestID: dSnap['requestID'],
@@ -145,10 +146,19 @@ class RequestBoxWithEdit extends StatelessWidget {
                                         'Posted ${difference.toInt()} minutes ago',
                                         style: TextStyle(color: Colors.black),
                                       )
-                                    : Text(
-                                        'Posted ${(difference / 30).toInt()} hours ago',
-                                        style: TextStyle(color: Colors.black),
-                                      )
+                                    : difference < 1440
+                                        ? Text(
+                                            'Posted ${(difference / 30).toInt()} hours ago',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Posted ${(difference ~/ (24 * 60)).toInt()} days ago',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          )
                               ],
                             ),
                           ),

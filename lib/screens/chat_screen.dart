@@ -29,7 +29,7 @@ class ChatScreen extends StatefulWidget {
   final String roomID;
   final String requestID;
   final String mentorID;
-  final int admin;
+  final bool admin;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -201,11 +201,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         padding: const EdgeInsets.only(
                           right: 8.0,
                         ),
-                        child: widget.admin == 1
+                        child: widget.admin
                             ? GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (_) => GroupMembers(
+                                            isAdmin: widget.admin,
                                             roomID: widget.roomID,
                                             requestID: widget.requestID,
                                           )));
@@ -214,7 +215,19 @@ class _ChatScreenState extends State<ChatScreen> {
                                   CupertinoIcons.person_add,
                                 ),
                               )
-                            : Container(),
+                            : GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (_) => GroupMembers(
+                                            isAdmin: widget.admin,
+                                            roomID: widget.roomID,
+                                            requestID: widget.requestID,
+                                          )));
+                                },
+                                child: Icon(
+                                  CupertinoIcons.person,
+                                ),
+                              ),
                       )
                     ],
                   ),

@@ -16,10 +16,12 @@ class ProfilePageNew extends StatefulWidget {
       {super.key,
       required this.mentorID,
       this.requestID = '',
-      required this.topic});
+      required this.topic,
+      required this.admin});
   final String mentorID;
   final String requestID;
   final String topic;
+  final bool admin;
 
   @override
   State<ProfilePageNew> createState() => _ProfilePageNewState();
@@ -30,16 +32,25 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
   final user = FirebaseAuth.instance.currentUser!;
 
   String chatRoomID(String user1, String user2) {
+    print("ring ring");
+    String x = widget.requestID.replaceAll("-", "");
+    print(x);
+    print(user1);
+    print(user2);
+    print(widget.requestID.replaceAll("-", ""));
     if (user1[0].toLowerCase().codeUnits[0] >
         user2[0].toLowerCase().codeUnits[0]) {
-      return "$user1$user2";
+      print("$user1$user2$x");
+      return "$user1$user2$x";
     } else {
-      return "$user2$user1";
+      print("$user1$user2$x");
+      return "$user2$user1$x";
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print('admin is 1');
     CollectionReference users = _firestore.collection('users');
     return Scaffold(
       appBar: AppBar(
@@ -185,10 +196,12 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                     GestureDetector(
                       onTap: () {
                         String roomID = chatRoomID(user.uid, widget.mentorID);
+                        print(roomID);
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => ChatScreen(
-                              admin: 1,
+                              //i was here
+                              admin: widget.admin,
                               requestID: widget.requestID,
                               roomID: roomID,
                               mentorID: widget.mentorID,

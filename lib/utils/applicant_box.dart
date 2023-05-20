@@ -255,15 +255,45 @@ class ApplicantBox extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () {
-                        assignMentor();
-                        Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => ProfilePage()));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Assigned as mentor 👍'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Assign Mentor'),
+                              content: Text(
+                                  'Do you want to assign ${dSnap['name']} as your mentor?'),
+                              actions: [
+                                TextButton(
+                                  child: Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(
+                                        false); // Returns false when canceled
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text('Confirm'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(
+                                        true); // Returns true when confirmed
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ).then((value) {
+                          // Handle the user's choice
+                          if (value != null && value) {
+                            assignMentor();
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => ProfilePage()));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Assigned as mentor 👍'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {}
+                        });
                       },
                       icon: Icon(
                         CupertinoIcons.arrowshape_turn_up_right_circle_fill,

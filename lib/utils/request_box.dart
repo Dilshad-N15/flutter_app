@@ -125,10 +125,19 @@ class RequestBox extends StatelessWidget {
                                         'Posted ${difference.toInt()} minutes ago',
                                         style: TextStyle(color: Colors.black),
                                       )
-                                    : Text(
-                                        'Posted ${(difference / 30).toInt()} hours ago',
-                                        style: TextStyle(color: Colors.black),
-                                      )
+                                    : difference < 1440
+                                        ? Text(
+                                            'Posted ${(difference / 30).toInt()} hours ago',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Posted ${(difference ~/ (24 * 60)).toInt()} days ago',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          )
                               ],
                             ),
                           ),

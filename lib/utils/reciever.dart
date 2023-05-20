@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +19,15 @@ class RecieverBox extends StatefulWidget {
 
 class _RecieverBoxState extends State<RecieverBox> {
   final audioPlayer = AudioPlayer();
-
+  Duration _duration = Duration();
+  Duration _position = Duration();
   bool isplaying = false;
   final user = FirebaseAuth.instance.currentUser!;
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -49,7 +53,7 @@ class _RecieverBoxState extends State<RecieverBox> {
                 ),
               )
             : Container(
-                width: 50,
+                width: 200,
                 margin: EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
                     color: Color(0xFF3a3f54),
@@ -59,30 +63,72 @@ class _RecieverBoxState extends State<RecieverBox> {
                       topLeft: Radius.circular(20),
                     )),
                 child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        audioPlayer.play(UrlSource(widget.message));
-                        setState(() {
-                          isplaying = true;
-                        });
-                        audioPlayer.onPlayerComplete.listen((event) {
-                          setState(() {
-                            isplaying = false;
-                          });
-                        });
-                      },
-                      child: isplaying == false
-                          ? Icon(
-                              Icons.play_arrow,
-                            )
-                          : Icon(
-                              Icons.pause,
+                    padding: const EdgeInsets.all(10.0),
+                    child: StatefulBuilder(builder: (context, setState) {
+                      return Container(
+                        width: width * 0.58,
+                        padding: EdgeInsets.only(top: 3),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              constraints: const BoxConstraints(
+                                minWidth: 50,
+                              ),
+                              onPressed: () async {
+                                if (isplaying) {
+                                  await audioPlayer.pause();
+                                  setState(() {
+                                    isplaying = false;
+                                  });
+                                } else {
+                                  audioPlayer.onDurationChanged
+                                      .listen((Duration duration) {
+                                    setState(() => _duration = duration);
+                                  });
+                                  audioPlayer.onPositionChanged
+                                      .listen((Duration position) {
+                                    setState(() => _position = position);
+                                  });
+                                  audioPlayer.onPlayerStateChanged
+                                      .listen((state) {
+                                    if (state == PlayerState.completed) {
+                                      setState(() {
+                                        _position = Duration();
+                                        isplaying = false;
+                                      });
+                                    }
+                                  });
+
+                                  await audioPlayer
+                                      .play(UrlSource(widget.message));
+                                  setState(() {
+                                    isplaying = true;
+                                  });
+                                }
+                              },
+                              icon: Icon(
+                                isplaying
+                                    ? Icons.pause_circle
+                                    : Icons.play_circle,
+                              ),
                             ),
-                    ),
-                  ),
-                ),
+                            SizedBox(
+                              width: width * 0.27,
+                              child: ProgressBar(
+                                progress: _position,
+                                buffered: _duration,
+                                total: _duration,
+                                progressBarColor: Colors.red,
+                                baseBarColor: Colors.white.withOpacity(0.24),
+                                onSeek: (Duration duration) {
+                                  audioPlayer.seek(duration);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    })),
               ),
         SizedBox(
           width: 10,

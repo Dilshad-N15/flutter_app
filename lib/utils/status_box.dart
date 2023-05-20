@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
 import 'package:mentor_mind/screens/applications.dart';
+import 'package:mentor_mind/screens/profilePage.dart';
 import 'package:mentor_mind/utils/category_box_inside_req.dart';
 
 class ApplicationStatusViewBox extends StatelessWidget {
@@ -138,15 +139,16 @@ class ApplicationStatusViewBox extends StatelessWidget {
                                 : dSnap['mentor'] == user.uid
                                     ? GestureDetector(
                                         onTap: () {
-                                          // Navigator.of(context).push(
-                                          //   MaterialPageRoute(
-                                          //     builder: (_) =>
-                                          //         ProfilePageNew(
-                                          //       mentorID: dSnap['uid'],
-                                          //       topic: dSnap['topic'],
-                                          //     ),
-                                          //   ),
-                                          // );
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) => ProfilePageNew(
+                                                admin: false,
+                                                mentorID: dSnap['uid'],
+                                                topic: dSnap['topic'],
+                                                requestID: dSnap['requestID'],
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Text(
                                           'Approved 😃 click me!',
