@@ -36,7 +36,7 @@ class _SenderBoxState extends State<SenderBox> {
       children: [
         CircleAvatar(
             backgroundColor: Colors.white,
-            child: SvgPicture.network(
+            child: Image.network(
               'https://avatars.dicebear.com/api/identicon/${widget.uid}.svg',
               width: 20,
               height: 20,

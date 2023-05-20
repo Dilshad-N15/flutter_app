@@ -199,7 +199,7 @@ class ApplicantBox extends StatelessWidget {
                             child: Container(
                               height: 20,
                               width: 20,
-                              child: SvgPicture.network(
+                              child: Image.network(
                                 'https://avatars.dicebear.com/api/identicon/${dSnap["name"]}.svg',
                               ),
                             ))
@@ -425,7 +425,7 @@ class CommentBox extends StatelessWidget {
           children: [
             CircleAvatar(
                 backgroundColor: Color.fromARGB(255, 85, 77, 77),
-                child: SvgPicture.network(
+                child: Image.network(
                   'https://api.dicebear.com/5.x/identicon/svg?seed=${name}',
                   width: 20,
                   height: 20,

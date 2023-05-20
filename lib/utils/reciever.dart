@@ -135,7 +135,7 @@ class _RecieverBoxState extends State<RecieverBox> {
         ),
         CircleAvatar(
             backgroundColor: Colors.white,
-            child: SvgPicture.network(
+            child: Image.network(
               'https://avatars.dicebear.com/api/identicon/${user.uid}.svg',
               width: 20,
               height: 20,

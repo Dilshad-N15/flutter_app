@@ -1,21 +1,34 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mentor_mind/auth/storage_methods.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //signup
-  Future<String> signupUser(
-      {required String email,
-      required String password,
-      required String name}) async {
+  Future<String> signupUser({
+    required String email,
+    required String password,
+    required String name,
+    required String phone,
+    required Uint8List image,
+  }) async {
     String result = "some error occured";
     try {
-      if (email.isNotEmpty || password.isNotEmpty) {
+      if (phone.length == 10 &&
+          image != null &&
+          name.isNotEmpty &&
+          name.isNotEmpty &&
+          password.isNotEmpty) {
         //register
         UserCredential credential = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
+
+        String photourl = await StorageMethods()
+            .uploadImageStorage('profilepics', image, false);
 
         //add college to database
         await _firestore.collection('users').doc(credential.user!.uid).set({
@@ -24,6 +37,7 @@ class AuthMethods {
           'uid': credential.user!.uid,
           'rating': 0,
           'ratingCount': 0,
+          'img': photourl,
         });
         result = "success";
       }

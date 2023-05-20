@@ -22,6 +22,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final user = FirebaseAuth.instance.currentUser!;
   var name = '';
+  var image = '';
   @override
   void initState() {
     super.initState();
@@ -36,6 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() {
       name = (snap.data() as Map<String, dynamic>)['name'];
+      image = (snap.data() as Map<String, dynamic>)['img'];
     });
   }
 
@@ -73,6 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         ProfilePic(
+                          image: image,
                           name: name,
                         ),
                         const SizedBox(height: 20.0),
@@ -136,6 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     ProfilePic(
                       name: name,
+                      image: image,
                     ),
                     const SizedBox(height: 20.0),
                     ProfileMenu(
@@ -224,9 +228,11 @@ class ProfilePic extends StatelessWidget {
   ProfilePic({
     Key? key,
     required this.name,
+    required this.image,
   }) : super(key: key);
 
   final String name;
+  final String image;
   final user = FirebaseAuth.instance.currentUser!;
   @override
   Widget build(BuildContext context) {
@@ -240,11 +246,15 @@ class ProfilePic extends StatelessWidget {
           CircleAvatar(
             backgroundColor: const Color.fromARGB(255, 245, 244, 244),
             child: Container(
-              height: 70,
-              width: 70,
+              height: 115,
+              width: 115,
               child: name != ''
-                  ? SvgPicture.network(
-                      'https://avatars.dicebear.com/api/identicon/${user.uid}.svg',
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Image.network(
+                        image,
+                        fit: BoxFit.cover,
+                      ),
                     )
                   : LoadingAnimationWidget.waveDots(
                       color: Colors.black, size: 40),
