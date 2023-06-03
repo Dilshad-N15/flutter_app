@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,7 +36,7 @@ class _RequestPageState extends State<RequestPage> {
           : _selectedSubject,
       description: _noteController.text,
       uid: user.uid,
-      date: date.toString(),
+      date: _selectedValue,
       type: selectedRadioButton,
       amount: _amountController.text,
       requestID: requestID,
@@ -72,6 +73,7 @@ class _RequestPageState extends State<RequestPage> {
   String selectedRadioButton = 'Theory';
   bool _isOther = false;
   int _selected = DateTime.now().day;
+  DateTime _selectedValue = DateTime.now();
 
   @override
   void initState() {
@@ -362,7 +364,25 @@ class _RequestPageState extends State<RequestPage> {
                         SizedBox(
                           height: 18,
                         ),
-                        hrizontalCapsuleListView(),
+                        // hrizontalCapsuleListView(),
+                        DatePicker(
+                          DateTime.now(),
+                          initialSelectedDate: DateTime.now(),
+                          selectionColor: Colors.black,
+                          dateTextStyle: TextStyle(color: Colors.white),
+                          monthTextStyle: TextStyle(color: Colors.white),
+                          selectedTextColor: Colors.white,
+                          onDateChange: (dates) {
+                            // New date selected
+                            setState(() {
+                              // currentDateTime = currentMonthList[index];
+                              // date = (index + 1);
+                              // _selected = dates - 1;
+                              _selectedValue = dates;
+                              print(_selectedValue);
+                            });
+                          },
+                        ),
                         SizedBox(
                           height: 18,
                         ),

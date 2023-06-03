@@ -102,7 +102,7 @@ class RequestBoxWithEdit extends StatelessWidget {
                             children: [
                               CategoryBoxInside(
                                   title:
-                                      '${dSnap["date"]}-${DateFormat("MMM").format(DateTime.now())}'),
+                                      '${dSnap["date"].toDate().day}-${DateFormat("MMM").format(DateTime.now())}'),
                               // CategoryBoxInside(title: 'Physics'),
                               CategoryBoxInside(title: dSnap['type']),
                             ],
@@ -179,17 +179,48 @@ class RequestBoxWithEdit extends StatelessWidget {
             right: 0,
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return RequestUpadatePage(
-                        dSnap: dSnap,
-                        subjects: Request.types,
-                      );
-                    },
-                  ),
-                );
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Confirmation'),
+                      content:
+                          Text('Are you sure you want to edit this request?'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(false); // Return false when canceled
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Edit'),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(true); // Return true when confirmed
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ).then((confirmed) {
+                  if (confirmed != null && confirmed) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return RequestUpadatePage(
+                            dSnap: dSnap,
+                            subjects: Request.types,
+                          );
+                        },
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                });
               },
               child: Container(
                 height: 40,

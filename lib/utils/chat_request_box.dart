@@ -117,7 +117,7 @@ class ChatRequestBox extends StatelessWidget {
                                     children: [
                                       CategoryBoxInside(
                                           title:
-                                              '${dSnap["date"]}-${DateFormat("MMM").format(DateTime.now())}'),
+                                              '${dSnap["date"].toDate().day}-${DateFormat("MMM").format(DateTime.now())}'),
                                       // CategoryBoxInside(title: 'Physics'),
                                       CategoryBoxInside(title: dSnap['type']),
                                     ],

@@ -5,7 +5,7 @@ class Request {
   final String description;
   final String uid;
   // final String subject;
-  final String date;
+  final DateTime date;
   final String type;
   final String name;
   final String amount;
