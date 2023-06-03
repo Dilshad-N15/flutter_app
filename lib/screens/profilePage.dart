@@ -222,12 +222,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                           child: Container(
                             margin: EdgeInsets.all(20),
                             child: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: Image.network(
-                                'https://avatars.dicebear.com/api/identicon/${widget.mentorID}.svg',
-                                width: 75,
-                                height: 75,
-                              ),
+                              backgroundImage: NetworkImage(snap['img']),
                             ),
                           ),
                         ),

@@ -175,34 +175,66 @@ class ApplicationStatusViewBox extends StatelessWidget {
             right: 0,
             child: GestureDetector(
               onTap: () async {
-                try {
-                  await _firestore
-                      .collection('requests')
-                      .doc(dSnap['requestID'])
-                      .update({
-                    'applicants': FieldValue.arrayRemove(
-                      [user.uid],
-                    ),
-                  });
-                } catch (e) {}
-                try {
-                  await _firestore.collection('users').doc(user.uid).update(
-                    {
-                      'applied': FieldValue.arrayRemove([dSnap['requestID']]),
-                    },
-                  );
-                } catch (e) {}
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (_) => PersonalApplicationsView(),
-                  ),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Application Removed'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Confirmation'),
+                      content: Text(
+                          'Are you sure you want to apply for this request?'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(false); // Return false when canceled
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Yes'),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(true); // Return true when confirmed
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ).then((confirmed) async {
+                  if (confirmed != null && confirmed) {
+                    try {
+                      await _firestore
+                          .collection('requests')
+                          .doc(dSnap['requestID'])
+                          .update({
+                        'applicants': FieldValue.arrayRemove(
+                          [user.uid],
+                        ),
+                      });
+                    } catch (e) {}
+                    try {
+                      await _firestore.collection('users').doc(user.uid).update(
+                        {
+                          'applied':
+                              FieldValue.arrayRemove([dSnap['requestID']]),
+                        },
+                      );
+                    } catch (e) {}
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => PersonalApplicationsView(),
+                      ),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Application Removed'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                });
               },
               child: dSnap['mentor'] == ''
                   ? Container(

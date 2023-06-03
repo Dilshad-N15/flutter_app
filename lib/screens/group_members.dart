@@ -29,7 +29,6 @@ class _GroupMembersState extends State<GroupMembers> {
   List<dynamic> result = [];
 
   void onSearch(String value) async {
-    print("running on $value");
     try {
       await _firestore
           .collection('users')
@@ -48,6 +47,34 @@ class _GroupMembersState extends State<GroupMembers> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    checkAndCreateDocument();
+  }
+
+  Future checkAndCreateDocument() async {
+    print('checking');
+    DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(widget.roomID)
+        .collection('messages')
+        .doc('members')
+        .get();
+
+    print(docSnapshot.exists);
+
+    if (!docSnapshot.exists) {
+      // Document doesn't exist, create a new document
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(widget.roomID)
+          .collection('messages')
+          .doc('members')
+          .set({'members': []});
+    }
+  }
+
   void addToGroup(String id) async {
     try {
       await _firestore
@@ -55,9 +82,9 @@ class _GroupMembersState extends State<GroupMembers> {
           .doc(widget.roomID)
           .collection('messages')
           .doc('members')
-          .update({
+          .set({
         'members': FieldValue.arrayUnion([id])
-      });
+      }, SetOptions(merge: true));
     } catch (e) {
       print(e.toString());
     }
@@ -111,11 +138,6 @@ class _GroupMembersState extends State<GroupMembers> {
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
     Map<String, dynamic>? userData = userDataSnapshot.data();
     return userData!;
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override

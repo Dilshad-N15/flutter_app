@@ -100,6 +100,13 @@ class _ChatScreenState extends State<ChatScreen> {
       "type": 'text',
       "time": DateTime.now(),
     };
+
+    try {
+      await _firestore.collection('chats').doc(widget.roomID).set({'set': 1});
+    } catch (e) {
+      print(e.toString());
+    }
+
     try {
       await _firestore
           .collection('chats')
