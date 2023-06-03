@@ -1,14 +1,25 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DescriptionBox extends StatelessWidget {
   DescriptionBox({super.key, required this.description});
   String description;
 
+  void _launchURL() async {
+    if (await canLaunch(description)) {
+      await launch(description);
+    } else {
+      throw 'Could not launch $description';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(description);
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Container(
@@ -43,7 +54,7 @@ class DescriptionBox extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Job Description',
+                                'Links',
                                 style: TextStyle(fontWeight: FontWeight.w500),
                               ),
                               // Text('Flutter'),
@@ -52,9 +63,16 @@ class DescriptionBox extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
-                      description,
-                    )
+                    SizedBox(
+                      height: 10,
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        text: description,
+                        style: TextStyle(color: Colors.white),
+                        recognizer: TapGestureRecognizer()..onTap = _launchURL,
+                      ),
+                    ),
                   ],
                 ),
               ),

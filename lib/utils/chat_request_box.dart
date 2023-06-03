@@ -51,6 +51,7 @@ class ChatRequestBox extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ChatScreen(
+                      reqsnap: dSnap,
                       admin: false,
                       requestID: '',
                       roomID: roomID,

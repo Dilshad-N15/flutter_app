@@ -8,11 +8,12 @@ import 'package:mentor_mind/utils/applicant_box.dart';
 import 'package:mentor_mind/utils/request_box.dart';
 
 class GetApplicantData extends StatelessWidget {
-  GetApplicantData(
-      {super.key,
-      required this.docID,
-      required this.reqID,
-      required this.topic});
+  GetApplicantData({
+    super.key,
+    required this.docID,
+    required this.reqID,
+    required this.topic,
+  });
 
   final String docID;
   final String topic;

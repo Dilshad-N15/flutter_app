@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,9 +11,11 @@ class Rating extends StatefulWidget {
     super.key,
     required this.mentorID,
     required this.type,
+    required this.link,
   });
   final String mentorID;
   final String type;
+  final String link;
 
   @override
   State<Rating> createState() => _RatingState();

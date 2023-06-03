@@ -107,7 +107,7 @@ class _DescriptionState extends State<Description> {
                     height: 10,
                   ),
                   DescriptionBox(
-                    description: widget.dSnap['description'],
+                    description: widget.dSnap['link'],
                   ),
                   SizedBox(
                     height: 10,

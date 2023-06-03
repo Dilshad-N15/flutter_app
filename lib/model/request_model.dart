@@ -13,6 +13,8 @@ class Request {
   final List<String> applicants;
   final String mentor;
   final DateTime datetime;
+  final bool payment;
+  final String link;
   static List<String> types = [
     'All',
     'Flutter',
@@ -44,6 +46,8 @@ class Request {
     this.applicants = const [],
     this.mentor = '',
     required this.datetime,
+    this.payment = false,
+    this.link = '',
   });
 
   Map<String, dynamic> toJson() => {
@@ -59,6 +63,8 @@ class Request {
         'mentor': mentor,
         'datetime': datetime,
         'name': name,
+        'payment': payment,
+        'link': link,
       };
 
   static Request fromSnap(DocumentSnapshot documentSnapshot) {
@@ -76,6 +82,8 @@ class Request {
       applicants: snapshot['applicants'],
       mentor: snapshot['mentor'],
       datetime: snapshot['datetime'],
+      payment: snapshot['payment'],
+      link: snapshot['link'],
     );
   }
 }

@@ -1,12 +1,14 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:mentor_mind/model/call.dart';
@@ -29,11 +31,13 @@ class ChatScreen extends StatefulWidget {
     required this.requestID,
     required this.admin,
     required this.Mentorsnap,
+    required this.reqsnap,
   });
   final String roomID;
   final String requestID;
   final String mentorID;
   var Mentorsnap;
+  var reqsnap;
   final bool admin;
 
   @override
@@ -46,6 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _message = TextEditingController();
   final recorder = SoundRecorder();
   final firestore = FirebaseFirestore.instance;
+  ScrollController _scrollController = ScrollController();
 
   final player = SoundPlayer();
   Call? senderCallData;
@@ -56,6 +61,8 @@ class _ChatScreenState extends State<ChatScreen> {
     recorder.init();
     player.init();
     super.initState();
+
+    _scrollToBottom();
   }
 
   @override
@@ -93,30 +100,53 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 100), () {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    });
+  }
+
   void sendMessage() async {
-    Map<String, dynamic> message = {
-      "by": user.uid,
-      "message": _message.text,
-      "type": 'text',
-      "time": DateTime.now(),
-    };
+    if (widget.reqsnap['payment'] != true) {
+      Map<String, dynamic> message = {
+        "by": user.uid,
+        "message": _message.text,
+        "type": 'text',
+        "time": DateTime.now(),
+      };
 
-    try {
-      await _firestore.collection('chats').doc(widget.roomID).set({'set': 1});
-    } catch (e) {
-      print(e.toString());
-    }
+      try {
+        await _firestore.collection('chats').doc(widget.roomID).set({'set': 1});
+      } catch (e) {
+        print(e.toString());
+      }
 
-    try {
-      await _firestore
-          .collection('chats')
-          .doc(widget.roomID)
-          .collection('messages')
-          .add(message);
-    } catch (e) {
-      print(e.toString());
+      try {
+        await _firestore
+            .collection('chats')
+            .doc(widget.roomID)
+            .collection('messages')
+            .add(message);
+      } catch (e) {
+        print(e.toString());
+      }
+    } else {
+      _message.clear();
+      _scrollToBottom();
+      print('This chat is closed');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('This chat is closed'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
-    _message.clear();
   }
 
   Future sendVoice(String url) async {
@@ -246,252 +276,265 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                     child: Scaffold(
                       body: Scaffold(
-                        backgroundColor: Colors.black,
-                        appBar: AppBar(
                           backgroundColor: Colors.black,
-                          leading: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Icon(CupertinoIcons.back)),
-                          title: Row(
-                            children: [
-                              snap['status'] == 'online'
-                                  ? Container(
-                                      height: 10,
-                                      width: 10,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.green,
+                          appBar: AppBar(
+                            backgroundColor: Colors.black,
+                            leading: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Icon(CupertinoIcons.back)),
+                            title: Row(
+                              children: [
+                                snap['status'] == 'online'
+                                    ? Container(
+                                        height: 10,
+                                        width: 10,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.green,
+                                        ),
+                                      )
+                                    : Container(
+                                        height: 10,
+                                        width: 10,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.red,
+                                        ),
                                       ),
-                                    )
-                                  : Container(
-                                      height: 10,
-                                      width: 10,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                      ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  snap['name'],
+                                  style: GoogleFonts.getFont(
+                                    'Noto Sans Display',
+                                    textStyle: TextStyle(
+                                      fontSize: 20,
+                                      letterSpacing: .5,
                                     ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                snap['name'],
-                                style: GoogleFonts.getFont(
-                                  'Noto Sans Display',
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    letterSpacing: .5,
                                   ),
                                 ),
+                              ],
+                            ),
+                            centerTitle: true,
+                            actions: [
+                              Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: 8.0,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      makeCall(
+                                          currentUserName:
+                                              currenUserData['name'],
+                                          currentUserPic:
+                                              currenUserData['img']);
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => CallScreen(
+                                            channelId: senderCallData!.callId,
+                                            call: senderCallData!,
+                                            isGroupChat: false,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      CupertinoIcons.video_camera,
+                                    ),
+                                  )),
+                              SizedBox(
+                                width: 20,
                               ),
-                            ],
-                          ),
-                          centerTitle: true,
-                          actions: [
-                            Padding(
+                              Padding(
                                 padding: const EdgeInsets.only(
                                   right: 8.0,
                                 ),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    makeCall(
-                                        currentUserName: currenUserData['name'],
-                                        currentUserPic: currenUserData['img']);
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => CallScreen(
-                                          channelId: senderCallData!.callId,
-                                          call: senderCallData!,
-                                          isGroupChat: false,
+                                child: widget.admin
+                                    ? GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .push(MaterialPageRoute(
+                                                  builder: (_) => GroupMembers(
+                                                        isAdmin: widget.admin,
+                                                        roomID: widget.roomID,
+                                                        requestID:
+                                                            widget.requestID,
+                                                      )));
+                                        },
+                                        child: Icon(
+                                          CupertinoIcons.person_add,
+                                        ),
+                                      )
+                                    : GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .push(MaterialPageRoute(
+                                                  builder: (_) => GroupMembers(
+                                                        isAdmin: widget.admin,
+                                                        roomID: widget.roomID,
+                                                        requestID:
+                                                            widget.requestID,
+                                                      )));
+                                        },
+                                        child: Icon(
+                                          CupertinoIcons.person,
                                         ),
                                       ),
-                                    );
-                                  },
-                                  child: Icon(
-                                    CupertinoIcons.video_camera,
-                                  ),
-                                )),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: 8.0,
-                              ),
-                              child: widget.admin
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .push(MaterialPageRoute(
-                                                builder: (_) => GroupMembers(
-                                                      isAdmin: widget.admin,
-                                                      roomID: widget.roomID,
-                                                      requestID:
-                                                          widget.requestID,
-                                                    )));
-                                      },
-                                      child: Icon(
-                                        CupertinoIcons.person_add,
-                                      ),
-                                    )
-                                  : GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .push(MaterialPageRoute(
-                                                builder: (_) => GroupMembers(
-                                                      isAdmin: widget.admin,
-                                                      roomID: widget.roomID,
-                                                      requestID:
-                                                          widget.requestID,
-                                                    )));
-                                      },
-                                      child: Icon(
-                                        CupertinoIcons.person,
-                                      ),
-                                    ),
-                            )
-                          ],
-                        ),
-                        body: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height - 150,
-                                child: StreamBuilder<QuerySnapshot>(
-                                  stream: _firestore
-                                      .collection('chats')
-                                      .doc(widget.roomID)
-                                      .collection('messages')
-                                      .orderBy("time", descending: false)
-                                      .snapshots(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot snapshot) {
-                                    if (snapshot.data != null) {
-                                      return ListView.builder(
-                                          itemCount: snapshot.data.docs.length,
-                                          itemBuilder: (context, index) {
-                                            Map<String, dynamic> snap =
-                                                snapshot.data.docs[index].data()
-                                                    as Map<String, dynamic>;
-                                            if (snap['by'] == user.uid) {
-                                              return RecieverBox(
-                                                  type: snap['type'],
-                                                  message: snap['message']);
-                                            } else {
-                                              return SenderBox(
-                                                  uid: snap['by'],
-                                                  type: snap['type'],
-                                                  message: snap['message']);
-                                            }
-                                          });
-                                    } else {
-                                      return Center(
-                                        child: LoadingAnimationWidget.waveDots(
-                                            color: Colors.white, size: 40),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
+                              )
                             ],
                           ),
-                        ),
-                        bottomNavigationBar: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            child: Row(
+                          body: SingleChildScrollView(
+                            controller: _scrollController,
+                            child: Column(
                               children: [
-                                Consumer<ChatState>(
-                                    builder: (context, chatState, child) {
-                                  final color = chatState.isIconPressed
-                                      ? Colors.green
-                                      : Colors.transparent;
-                                  return Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: color,
-                                    ),
-                                  );
-                                }),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Consumer<ChatState>(
-                                  builder: (context, chatState, child) {
-                                    final color = chatState.isIconPressed
-                                        ? Colors.blue
-                                        : Colors.grey;
-
-                                    return IconButton(
-                                      icon: Icon(Icons.mic),
-                                      color: color,
-                                      onPressed: () async {
-                                        chatState.toggleIcon();
-                                        final isRecoring =
-                                            await recorder.toggleRecording();
-                                        // await player.togglePlay(whenFinished: () {});
-                                      },
-                                    );
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF3a3f54),
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
-                                      child: TextField(
-                                        controller: _message,
-                                        decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          hintText: 'write message..',
-                                        ),
-                                      ),
-                                    ),
+                                Container(
+                                  height:
+                                      MediaQuery.of(context).size.height - 150,
+                                  child: StreamBuilder<QuerySnapshot>(
+                                    stream: _firestore
+                                        .collection('chats')
+                                        .doc(widget.roomID)
+                                        .collection('messages')
+                                        .orderBy("time", descending: false)
+                                        .snapshots(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot snapshot) {
+                                      SchedulerBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        _scrollController.jumpTo(
+                                            _scrollController
+                                                .position.maxScrollExtent);
+                                      });
+                                      if (snapshot.data != null) {
+                                        return ListView.builder(
+                                            controller: _scrollController,
+                                            itemCount:
+                                                snapshot.data.docs.length,
+                                            itemBuilder: (context, index) {
+                                              Map<String, dynamic> snap =
+                                                  snapshot.data.docs[index]
+                                                          .data()
+                                                      as Map<String, dynamic>;
+                                              if (snap['by'] == user.uid) {
+                                                return RecieverBox(
+                                                    type: snap['type'],
+                                                    message: snap['message']);
+                                              } else {
+                                                return SenderBox(
+                                                    uid: snap['by'],
+                                                    type: snap['type'],
+                                                    message: snap['message']);
+                                              }
+                                            });
+                                      } else {
+                                        return Center(
+                                          child:
+                                              LoadingAnimationWidget.waveDots(
+                                                  color: Colors.white,
+                                                  size: 40),
+                                        );
+                                      }
+                                    },
                                   ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    if (!_message.text.isEmpty) {
-                                      sendMessage();
-                                    } else {
-                                      uploadVoice();
-                                    }
-                                  },
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Color(0xFF6a65fd),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Icon(
-                                          CupertinoIcons.rocket,
-                                        ),
-                                      )),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ),
+                          bottomNavigationBar: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              child: Row(
+                                children: [
+                                  Consumer<ChatState>(
+                                      builder: (context, chatState, child) {
+                                    final color = chatState.isIconPressed
+                                        ? Colors.green
+                                        : Colors.transparent;
+                                    return Container(
+                                      width: 10,
+                                      height: 10,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: color,
+                                      ),
+                                    );
+                                  }),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Consumer<ChatState>(
+                                    builder: (context, chatState, child) {
+                                      final color = chatState.isIconPressed
+                                          ? Colors.blue
+                                          : Colors.grey;
+
+                                      return IconButton(
+                                        icon: Icon(Icons.mic),
+                                        color: color,
+                                        onPressed: () async {
+                                          chatState.toggleIcon();
+                                          final isRecoring =
+                                              await recorder.toggleRecording();
+                                          // await player.togglePlay(whenFinished: () {});
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF3a3f54),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: TextField(
+                                          controller: _message,
+                                          decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: 'write message..',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (!_message.text.isEmpty) {
+                                        sendMessage();
+                                      } else {
+                                        uploadVoice();
+                                      }
+                                    },
+                                    child: Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(0xFF6a65fd),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: Icon(
+                                            CupertinoIcons.rocket,
+                                          ),
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )),
                     ),
                   );
                 }

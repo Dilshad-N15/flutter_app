@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -195,14 +195,8 @@ class ApplicantBox extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
-                            backgroundColor: Color.fromARGB(255, 224, 223, 223),
-                            child: Container(
-                              height: 20,
-                              width: 20,
-                              child: Image.network(
-                                'https://avatars.dicebear.com/api/identicon/${dSnap["name"]}.svg',
-                              ),
-                            ))
+                          backgroundImage: NetworkImage(dSnap['img']),
+                        )
                       ],
                     ),
                     const SizedBox(

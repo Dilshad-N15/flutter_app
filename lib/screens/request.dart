@@ -42,6 +42,7 @@ class _RequestPageState extends State<RequestPage> {
       requestID: requestID,
       name: name,
       datetime: DateTime.now(),
+      link: _linkController.text,
     );
 
     try {
@@ -69,6 +70,7 @@ class _RequestPageState extends State<RequestPage> {
   final _topicController = TextEditingController();
   final _noteController = TextEditingController();
   final _amountController = TextEditingController();
+  final _linkController = TextEditingController();
   var _selectedSubject = '';
   String selectedRadioButton = 'Theory';
   bool _isOther = false;
@@ -317,6 +319,32 @@ class _RequestPageState extends State<RequestPage> {
                               ),
                             ),
                             labelText: 'Amount',
+                            labelStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 18,
+                        ),
+                        TextField(
+                          controller: _linkController,
+                          textInputAction: TextInputAction.done,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFC31DC7),
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: BorderSide(
+                                color: Color(0xFFC31DC7),
+                              ),
+                            ),
+                            labelText: 'Project link(optional)',
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,

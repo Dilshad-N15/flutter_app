@@ -63,9 +63,13 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
     }
   }
 
-  displayPaymentSheet() async {
+  displayPaymentSheet(String link) async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) {
+        FirebaseFirestore.instance
+            .collection('requests')
+            .doc(widget.requestID)
+            .update({'payment': true});
         showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -84,11 +88,13 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                     ],
                   ),
                 ));
+
         // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => Rating(
               type: widget.topic,
+              link: link,
               mentorID: widget.mentorID,
             ),
           ),
@@ -109,7 +115,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
     }
   }
 
-  Future<void> makePayment() async {
+  Future<void> makePayment(String link) async {
     try {
       paymentIntent = await createPaymentIntent('500', 'INR');
       //Payment Sheet
@@ -124,7 +130,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
           .then((value) {});
 
       ///now finally display payment sheeet
-      displayPaymentSheet();
+      displayPaymentSheet(link);
     } catch (e, s) {
       print('exception:$e$s');
     }
@@ -182,198 +188,220 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
             Map<String, dynamic> snap =
                 snapshot.data!.data() as Map<String, dynamic>;
             print(snap);
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Center(
-                  child: Container(
-                    margin: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0A2647).withOpacity(0.8),
-                      shape: BoxShape.circle,
-                    ),
-                    height: 300.0,
-                    width: 300.0,
-                    child: Container(
-                      margin: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF144272).withOpacity(0.6),
-                        shape: BoxShape.circle,
-                      ),
-                      height: 300.0,
-                      width: 300.0,
-                      child: Container(
-                        margin: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF205295).withOpacity(0.4),
-                          shape: BoxShape.circle,
-                        ),
-                        height: 300.0,
-                        width: 300.0,
-                        child: Container(
-                          margin: EdgeInsets.all(20),
-                          height: 150.0,
-                          width: 150.0,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF2C74B3).withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
+            return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('requests')
+                    .doc(widget.requestID)
+                    .get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Text(''),
+                    );
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    Map<String, dynamic> reqsnap =
+                        snapshot.data!.data() as Map<String, dynamic>;
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Center(
                           child: Container(
                             margin: EdgeInsets.all(20),
-                            child: CircleAvatar(
-                              backgroundImage: NetworkImage(snap['img']),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF0A2647).withOpacity(0.8),
+                              shape: BoxShape.circle,
+                            ),
+                            height: 300.0,
+                            width: 300.0,
+                            child: Container(
+                              margin: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF144272).withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              height: 300.0,
+                              width: 300.0,
+                              child: Container(
+                                margin: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF205295).withOpacity(0.4),
+                                  shape: BoxShape.circle,
+                                ),
+                                height: 300.0,
+                                width: 300.0,
+                                child: Container(
+                                  margin: EdgeInsets.all(20),
+                                  height: 150.0,
+                                  width: 150.0,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF2C74B3).withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Container(
+                                    margin: EdgeInsets.all(20),
+                                    child: CircleAvatar(
+                                      backgroundImage:
+                                          NetworkImage(snap['img']),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        snap['name'],
-                        style: GoogleFonts.getFont(
-                          'Noto Sans Display',
-                          textStyle: TextStyle(
-                            fontSize: 20,
-                            letterSpacing: .5,
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                snap['name'],
+                                style: GoogleFonts.getFont(
+                                  'Noto Sans Display',
+                                  textStyle: TextStyle(
+                                    fontSize: 20,
+                                    letterSpacing: .5,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.star_fill,
+                                    color: Color(0xFFFFC4DD),
+                                  ),
+                                  Icon(
+                                    CupertinoIcons.star_fill,
+                                    color: Color(0xFFFFC4DD),
+                                  ),
+                                  Icon(
+                                    CupertinoIcons.star_fill,
+                                    color: Color(0xFFFFC4DD),
+                                  ),
+                                  Icon(
+                                    CupertinoIcons.star_fill,
+                                    color: Color(0xFFFFC4DD),
+                                  ),
+                                  Icon(
+                                    CupertinoIcons.star_lefthalf_fill,
+                                    color: Color(0xFFFFC4DD),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                '${snap["rating"].toStringAsFixed(2)} out of 5.0',
+                                style: GoogleFonts.getFont(
+                                  'Noto Sans Display',
+                                  textStyle: TextStyle(
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            CupertinoIcons.star_fill,
-                            color: Color(0xFFFFC4DD),
-                          ),
-                          Icon(
-                            CupertinoIcons.star_fill,
-                            color: Color(0xFFFFC4DD),
-                          ),
-                          Icon(
-                            CupertinoIcons.star_fill,
-                            color: Color(0xFFFFC4DD),
-                          ),
-                          Icon(
-                            CupertinoIcons.star_fill,
-                            color: Color(0xFFFFC4DD),
-                          ),
-                          Icon(
-                            CupertinoIcons.star_lefthalf_fill,
-                            color: Color(0xFFFFC4DD),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        '${snap["rating"].toStringAsFixed(2)} out of 5.0',
-                        style: GoogleFonts.getFont(
-                          'Noto Sans Display',
-                          textStyle: TextStyle(
-                            fontSize: 17,
-                          ),
+                        SizedBox(
+                          height: 50,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 50,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        String roomID = chatRoomID(user.uid, widget.mentorID);
-                        print(roomID);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ChatScreen(
-                              //i was here
-                              Mentorsnap: snap,
-                              admin: widget.admin,
-                              requestID: widget.requestID,
-                              roomID: roomID,
-                              mentorID: widget.mentorID,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                String roomID =
+                                    chatRoomID(user.uid, widget.mentorID);
+                                print(roomID);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ChatScreen(
+                                      //i was here
+                                      reqsnap: reqsnap,
+                                      Mentorsnap: snap,
+                                      admin: widget.admin,
+                                      requestID: widget.requestID,
+                                      roomID: roomID,
+                                      mentorID: widget.mentorID,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                height: 60,
+                                width: 60,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFFFC4DD),
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.chat_bubble,
+                                  color: Colors.black,
+                                  size: 30,
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFFFFC4DD),
+                            Container(
+                              height: 60,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFFeef2f5),
+                              ),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final String phoneNumber =
+                                      '1234567890'.trim();
+                                  final Uri phoneCall =
+                                      Uri(scheme: 'tel', path: phoneNumber);
+                                  try {
+                                    if (await canLaunch(phoneCall.toString())) {
+                                      await launch(phoneCall.toString());
+                                    }
+                                  } catch (e) {
+                                    print(e.toString());
+                                  }
+                                },
+                                child: Icon(
+                                  CupertinoIcons.phone_circle_fill,
+                                  color: Colors.black,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                await makePayment(reqsnap['link']);
+                              },
+                              child: Container(
+                                height: 60,
+                                width: 60,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFFFC4DD),
+                                ),
+                                child: Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.creditCard,
+                                    color: Colors.black,
+                                    size: 22,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Icon(
-                          CupertinoIcons.chat_bubble,
-                          color: Colors.black,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFeef2f5),
-                      ),
-                      child: GestureDetector(
-                        onTap: () async {
-                          final String phoneNumber = '1234567890'.trim();
-                          final Uri phoneCall =
-                              Uri(scheme: 'tel', path: phoneNumber);
-                          try {
-                            if (await canLaunch(phoneCall.toString())) {
-                              await launch(phoneCall.toString());
-                            }
-                          } catch (e) {
-                            print(e.toString());
-                          }
-                        },
-                        child: Icon(
-                          CupertinoIcons.phone_circle_fill,
-                          color: Colors.black,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        await makePayment();
-                      },
-                      child: Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFFFFC4DD),
-                        ),
-                        child: Center(
-                          child: FaIcon(
-                            FontAwesomeIcons.creditCard,
-                            color: Colors.black,
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
+                      ],
+                    );
+                  }
+                  return Container();
+                });
           }
           return Container();
         })),
