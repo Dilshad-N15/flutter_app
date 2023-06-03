@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mentor_mind/screens/chat_screen.dart';
 import 'package:mentor_mind/screens/rate.dart';
+import 'package:mentor_mind/utils/applicant_box.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:mentor_mind/.env';
@@ -61,6 +62,47 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
     } catch (err) {
       // ignore: avoid_print
       print('err charging user: ${err.toString()}');
+    }
+  }
+
+  Future<double> getRating(String type, String mentorId, String userId) async {
+    DocumentSnapshot ratingSnapshot;
+    print('widget.admin');
+    print(widget.admin);
+    print(mentorId);
+    print(userId);
+    if (widget.admin) {
+      ratingSnapshot = await FirebaseFirestore.instance
+          .collection('comments') // Replace 'type' with your collection name
+          .doc(mentorId) // Replace 'userId' with the desired document ID
+          .collection(type)
+          .doc(
+              'rating') // Assuming the rating is stored in a document named 'rating'
+          .get();
+    } else {
+      ratingSnapshot = await FirebaseFirestore.instance
+          .collection('comments') // Replace 'type' with your collection name
+          .doc(userId) // Replace 'userId' with the desired document ID
+          .collection(type)
+          .doc(
+              'rating') // Assuming the rating is stored in a document named 'rating'
+          .get();
+    }
+
+    print("ratingSnapshot.exists");
+    print(ratingSnapshot.exists);
+
+    if (ratingSnapshot.exists) {
+      print("ratingSnapshot.data()");
+
+      final d = ratingSnapshot.data() as Map<String, dynamic>;
+      print(d['rating']);
+      double rating = d['rating'];
+      print("rating");
+      print(rating);
+      return rating;
+    } else {
+      return 0; // Return 0 if the rating document doesn't exist
     }
   }
 
@@ -255,60 +297,90 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                           ),
                         ),
                         Center(
-                          child: Column(
-                            children: [
-                              Text(
-                                snap['name'],
-                                style: GoogleFonts.getFont(
-                                  'Noto Sans Display',
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    letterSpacing: .5,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.star_fill,
-                                      color: snap['rating'] >= 1
-                                          ? Color(0xFFFFC4DD)
-                                          : Colors.white),
-                                  Icon(CupertinoIcons.star_fill,
-                                      color: snap['rating'] >= 2
-                                          ? Color(0xFFFFC4DD)
-                                          : Colors.white),
-                                  Icon(CupertinoIcons.star_fill,
-                                      color: snap['rating'] >= 3
-                                          ? Color(0xFFFFC4DD)
-                                          : Colors.white),
-                                  Icon(CupertinoIcons.star_fill,
-                                      color: snap['rating'] >= 4
-                                          ? Color(0xFFFFC4DD)
-                                          : Colors.white),
-                                  Icon(CupertinoIcons.star_fill,
-                                      color: snap['rating'] >= 5
-                                          ? Color(0xFFFFC4DD)
-                                          : Colors.white),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '${snap["rating"].toStringAsFixed(2)} out of 5.0',
-                                style: GoogleFonts.getFont(
-                                  'Noto Sans Display',
-                                  textStyle: TextStyle(
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: FutureBuilder<double>(
+                              future: getRating(reqsnap['topic'],
+                                  reqsnap['mentor'], reqsnap['uid']),
+                              builder: (context, snapshotx) {
+                                if (snapshotx.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator(); // Show a loading indicator while fetching the rating
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  double rating = snapshotx.data ??
+                                      0; // Retrieve the rating value or default to 0
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        snap['name'],
+                                        style: GoogleFonts.getFont(
+                                          'Noto Sans Display',
+                                          textStyle: TextStyle(
+                                            fontSize: 20,
+                                            letterSpacing: .5,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      GestureDetector(
+                                        onTap: () => showModalBottomSheet(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            context: context,
+                                            builder: (context) {
+                                              return CommentModalSheet(
+                                                topic: reqsnap['topic'],
+                                                mentorID: widget.admin
+                                                    ? reqsnap['mentor']
+                                                    : reqsnap['uid'],
+                                              );
+                                            }),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(CupertinoIcons.star_fill,
+                                                color: rating >= 1
+                                                    ? Color(0xFFFFC4DD)
+                                                    : Colors.white),
+                                            Icon(CupertinoIcons.star_fill,
+                                                color: rating >= 2
+                                                    ? Color(0xFFFFC4DD)
+                                                    : Colors.white),
+                                            Icon(CupertinoIcons.star_fill,
+                                                color: rating >= 3
+                                                    ? Color(0xFFFFC4DD)
+                                                    : Colors.white),
+                                            Icon(CupertinoIcons.star_fill,
+                                                color: rating >= 4
+                                                    ? Color(0xFFFFC4DD)
+                                                    : Colors.white),
+                                            Icon(CupertinoIcons.star_fill,
+                                                color: rating >= 5
+                                                    ? Color(0xFFFFC4DD)
+                                                    : Colors.white),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        '${rating.toStringAsFixed(2)} out of 5.0',
+                                        style: GoogleFonts.getFont(
+                                          'Noto Sans Display',
+                                          textStyle: TextStyle(
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                              }),
                         ),
                         SizedBox(
                           height: 50,
@@ -421,6 +493,137 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
           }
           return Container();
         })),
+      ),
+    );
+  }
+}
+
+class CommentModalSheet extends StatefulWidget {
+  CommentModalSheet({
+    super.key,
+    required this.topic,
+    required this.mentorID,
+  });
+  final String topic;
+  final String mentorID;
+  @override
+  State<CommentModalSheet> createState() => _CommentModalSheetState();
+}
+
+class _CommentModalSheetState extends State<CommentModalSheet> {
+  Future<List<Comment>> getComments() async {
+    final subjectName = widget.topic;
+    final commentsRef = FirebaseFirestore.instance
+        .collection('comments')
+        .doc(widget.mentorID)
+        .collection(subjectName);
+
+    final commentsSnap = await commentsRef.get();
+    final comments = <Comment>[];
+
+    for (final doc in commentsSnap.docs) {
+      //
+      //
+      if (!doc.data().containsKey('rating')) {
+        final commentText = doc['comment'];
+        final fromUid = doc['from'];
+        final link = doc['link'];
+
+        final userRef =
+            FirebaseFirestore.instance.collection('users').doc(fromUid);
+
+        final userSnap = await userRef.get();
+        final userName = userSnap['name'];
+        final img = userSnap['img'];
+
+        print('$userName commented: $commentText');
+        comments.add(
+            Comment(name: userName, text: commentText, image: img, link: link));
+      }
+    }
+    return comments;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return SizedBox(
+      height: size.height * 0.5,
+      child: Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    child: Row(
+                      children: [
+                        Text(
+                          'Reviews',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(''),
+                      ],
+                    ),
+                  ),
+                  Row(children: [
+                    // const Icon(Icons.toggle_off_outlined),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(Icons.close)),
+                  ])
+                ],
+              ),
+              // AddCommentBox(),
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: FutureBuilder<List<Comment>>(
+                        future: getComments(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final comments = snapshot.data!;
+                            return ListView.builder(
+                              itemCount: comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = comments[index];
+                                print("comment");
+                                print(comment.name);
+                                return CommentBox(
+                                  comment: comment,
+                                );
+                              },
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
