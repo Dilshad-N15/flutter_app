@@ -3,16 +3,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mentor_mind/screens/profile.dart';
 import 'package:mentor_mind/screens/profilePage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Comment {
   final String name;
   final String text;
+  final String image;
+  final String link;
 
-  const Comment({required this.name, required this.text});
+  const Comment({
+    required this.name,
+    required this.text,
+    required this.image,
+    required this.link,
+  });
 }
 
 class CommentModalSheet extends StatefulWidget {
@@ -44,15 +53,18 @@ class _CommentModalSheetState extends State<CommentModalSheet> {
       if (!doc.data().containsKey('rating')) {
         final commentText = doc['comment'];
         final fromUid = doc['from'];
+        final link = doc['link'];
 
         final userRef =
             FirebaseFirestore.instance.collection('users').doc(fromUid);
 
         final userSnap = await userRef.get();
         final userName = userSnap['name'];
+        final img = userSnap['img'];
 
         print('$userName commented: $commentText');
-        comments.add(Comment(name: userName, text: commentText));
+        comments.add(
+            Comment(name: userName, text: commentText, image: img, link: link));
       }
     }
     return comments;
@@ -90,7 +102,7 @@ class _CommentModalSheetState extends State<CommentModalSheet> {
                     ),
                   ),
                   Row(children: [
-                    const Icon(Icons.toggle_off_outlined),
+                    // const Icon(Icons.toggle_off_outlined),
                     const SizedBox(
                       width: 5,
                     ),
@@ -116,9 +128,10 @@ class _CommentModalSheetState extends State<CommentModalSheet> {
                               itemCount: comments.length,
                               itemBuilder: (context, index) {
                                 final comment = comments[index];
+                                print("comment");
+                                print(comment.name);
                                 return CommentBox(
-                                  name: comment.name,
-                                  comment: comment.text,
+                                  comment: comment,
                                 );
                               },
                             );
@@ -294,22 +307,22 @@ class ApplicantBox extends StatelessWidget {
                         color: Colors.green[300],
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        // Navigator.of(context).push(
-                        //   MaterialPageRoute(
-                        //     builder: (_) => Player(
-                        //       pageNumber: index,
-                        //       book: widget.book,
-                        //     ),
-                        //   ),
-                        // );
-                      },
-                      icon: Icon(
-                        CupertinoIcons.delete,
-                        color: Colors.red[300],
-                      ),
-                    ),
+                    // IconButton(
+                    //   onPressed: () {
+                    //     // Navigator.of(context).push(
+                    //     //   MaterialPageRoute(
+                    //     //     builder: (_) => Player(
+                    //     //       pageNumber: index,
+                    //     //       book: widget.book,
+                    //     //     ),
+                    //     //   ),
+                    //     // );
+                    //   },
+                    //   icon: Icon(
+                    //     CupertinoIcons.delete,
+                    //     color: Colors.red[300],
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
@@ -406,9 +419,16 @@ class _AddCommentBoxState extends State<AddCommentBox> {
 }
 
 class CommentBox extends StatelessWidget {
-  const CommentBox({super.key, required this.name, required this.comment});
-  final String name;
-  final String comment;
+  CommentBox({super.key, required this.comment});
+  var comment;
+
+  void _launchURL() async {
+    if (await canLaunch(comment.link)) {
+      await launch(comment.link);
+    } else {
+      throw 'Could not launch ${comment.link}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -418,18 +438,31 @@ class CommentBox extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             CircleAvatar(
-                backgroundColor: Color.fromARGB(255, 85, 77, 77),
-                child: Image.network(
-                  'https://api.dicebear.com/5.x/identicon/svg?seed=${name}',
-                  width: 20,
-                  height: 20,
-                )),
+              backgroundImage: NetworkImage(
+                comment.image,
+              ),
+            ),
             SizedBox(
               width: 5,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(name), Text(comment)],
+              children: [
+                Text(comment.name),
+                Text(comment.text),
+                SizedBox(
+                  width: 300,
+                  child: RichText(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      text: comment.link,
+                      style: TextStyle(color: Colors.white),
+                      recognizer: TapGestureRecognizer()..onTap = _launchURL,
+                    ),
+                  ),
+                ),
+              ],
             )
           ],
         ));

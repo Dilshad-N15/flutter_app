@@ -43,6 +43,9 @@ class _RatingState extends State<Rating> {
 
     final CollectionReference commentsCollection =
         FirebaseFirestore.instance.collection('comments');
+
+    await commentsCollection.doc(widget.mentorID).set({'set': 1});
+
     final DocumentReference ratingDocumentRef = commentsCollection
         .doc(widget.mentorID)
         .collection(widget.type)
@@ -85,6 +88,7 @@ class _RatingState extends State<Rating> {
         .set({
       'comment': _comment.text.trim(),
       'from': user.uid,
+      'link': widget.link,
     });
 
     Navigator.pop(context);

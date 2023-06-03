@@ -17,12 +17,13 @@ import 'package:http/http.dart' as http;
 import 'package:mentor_mind/.env';
 
 class ProfilePageNew extends StatefulWidget {
-  ProfilePageNew(
-      {super.key,
-      required this.mentorID,
-      this.requestID = '',
-      required this.topic,
-      required this.admin});
+  ProfilePageNew({
+    super.key,
+    required this.mentorID,
+    this.requestID = '',
+    required this.topic,
+    required this.admin,
+  });
   final String mentorID;
   final String requestID;
   final String topic;
@@ -82,7 +83,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                             Icons.check_circle,
                             color: Colors.green,
                           ),
-                          Text("Payment Successfull"),
+                          Text("Payment Successful"),
                         ],
                       ),
                     ],
@@ -160,13 +161,13 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
 
   @override
   Widget build(BuildContext context) {
-    print('admin is 1');
+    print('admin is ${widget.admin}');
     CollectionReference users = _firestore.collection('users');
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.black,
-        title: Text('Your Mentor'),
+        title: widget.admin ? Text('Your Mentor') : Text('Your Mentee'),
         centerTitle: true,
         leading: GestureDetector(
             onTap: () {
@@ -187,6 +188,7 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
           if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> snap =
                 snapshot.data!.data() as Map<String, dynamic>;
+
             print(snap);
             return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
@@ -271,26 +273,26 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    CupertinoIcons.star_fill,
-                                    color: Color(0xFFFFC4DD),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.star_fill,
-                                    color: Color(0xFFFFC4DD),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.star_fill,
-                                    color: Color(0xFFFFC4DD),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.star_fill,
-                                    color: Color(0xFFFFC4DD),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.star_lefthalf_fill,
-                                    color: Color(0xFFFFC4DD),
-                                  ),
+                                  Icon(CupertinoIcons.star_fill,
+                                      color: snap['rating'] >= 1
+                                          ? Color(0xFFFFC4DD)
+                                          : Colors.white),
+                                  Icon(CupertinoIcons.star_fill,
+                                      color: snap['rating'] >= 2
+                                          ? Color(0xFFFFC4DD)
+                                          : Colors.white),
+                                  Icon(CupertinoIcons.star_fill,
+                                      color: snap['rating'] >= 3
+                                          ? Color(0xFFFFC4DD)
+                                          : Colors.white),
+                                  Icon(CupertinoIcons.star_fill,
+                                      color: snap['rating'] >= 4
+                                          ? Color(0xFFFFC4DD)
+                                          : Colors.white),
+                                  Icon(CupertinoIcons.star_fill,
+                                      color: snap['rating'] >= 5
+                                          ? Color(0xFFFFC4DD)
+                                          : Colors.white),
                                 ],
                               ),
                               SizedBox(
@@ -377,7 +379,19 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                             ),
                             GestureDetector(
                               onTap: () async {
-                                await makePayment(reqsnap['link']);
+                                if (!widget.admin) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => Rating(
+                                        type: widget.topic,
+                                        link: reqsnap['link'],
+                                        mentorID: widget.mentorID,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  await makePayment(reqsnap['link']);
+                                }
                               },
                               child: Container(
                                 height: 60,
@@ -388,7 +402,9 @@ class _ProfilePageNewState extends State<ProfilePageNew> {
                                 ),
                                 child: Center(
                                   child: FaIcon(
-                                    FontAwesomeIcons.creditCard,
+                                    widget.admin
+                                        ? FontAwesomeIcons.creditCard
+                                        : FontAwesomeIcons.star,
                                     color: Colors.black,
                                     size: 22,
                                   ),

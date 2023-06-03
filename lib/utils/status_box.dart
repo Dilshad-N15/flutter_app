@@ -181,13 +181,12 @@ class ApplicationStatusViewBox extends StatelessWidget {
                     return AlertDialog(
                       title: Text('Confirmation'),
                       content: Text(
-                          'Are you sure you want to apply for this request?'),
+                          'Are you sure you want to remove this application?'),
                       actions: <Widget>[
                         TextButton(
                           child: Text('Cancel'),
                           onPressed: () {
-                            Navigator.of(context)
-                                .pop(false); // Return false when canceled
+                            Navigator.of(context).pop();
                           },
                         ),
                         TextButton(
