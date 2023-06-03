@@ -136,6 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
       } catch (e) {
         print(e.toString());
       }
+      _message.clear();
     } else {
       _message.clear();
       _scrollToBottom();
@@ -150,22 +151,34 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future sendVoice(String url) async {
-    Map<String, dynamic> message = {
-      "by": user.uid,
-      "message": url,
-      "type": 'voice',
-      "time": DateTime.now(),
-    };
-    try {
-      await _firestore
-          .collection('chats')
-          .doc(widget.roomID)
-          .collection('messages')
-          .add(message);
-    } catch (e) {
-      print(e.toString());
+    if (widget.reqsnap['payment'] != true) {
+      Map<String, dynamic> message = {
+        "by": user.uid,
+        "message": url,
+        "type": 'voice',
+        "time": DateTime.now(),
+      };
+      try {
+        await _firestore
+            .collection('chats')
+            .doc(widget.roomID)
+            .collection('messages')
+            .add(message);
+      } catch (e) {
+        print(e.toString());
+      }
+      _message.clear();
+    } else {
+      _message.clear();
+      _scrollToBottom();
+      print('This chat is closed');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('This chat is closed'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
-    _message.clear();
   }
 
   void makeCall(

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'dart:math';
 
@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mentor_mind/screens/homescreen.dart';
+import 'package:mentor_mind/screens/profilePage.dart';
 import 'package:mentor_mind/utils/apply_box.dart';
 import 'package:mentor_mind/utils/category_box.dart';
 import 'package:mentor_mind/utils/description_box.dart';
@@ -92,6 +93,23 @@ class _DescriptionState extends State<Description> {
               title: Text(
                 'Job Details',
               ),
+              actions: [
+                GestureDetector(
+                    onTap: () => showModalBottomSheet(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        context: context,
+                        builder: (context) {
+                          return CommentModalSheet(
+                            topic: widget.dSnap['topic'],
+                            mentorID: widget.dSnap['uid'],
+                          );
+                        }),
+                    child: Icon(CupertinoIcons.bubble_left_bubble_right)),
+                SizedBox(
+                  width: 10,
+                ),
+              ],
             ),
             body: SingleChildScrollView(
               child: Column(
