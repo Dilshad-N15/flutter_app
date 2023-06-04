@@ -110,11 +110,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           menuText: "Requests",
                           icon: CupertinoIcons.arrow_left_right_circle,
                         ),
-                        // ProfileMenu(
-                        //   press: () {},
-                        //   menuText: "Settings",
-                        //   icon: CupertinoIcons.settings,
-                        // ),
                         ProfileMenu(
                           press: () {
                             signOutUser();
