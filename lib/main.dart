@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:mentor_mind/auth/user_check.dart';
 import 'package:mentor_mind/screens/splash.dart';
 import 'package:mentor_mind/.env';
+import 'package:wiredash/wiredash.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,17 +18,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {
-        'usercheck': (context) => UserCheck(),
-        '/': (context) => SplashScreen(),
-      },
-      debugShowCheckedModeBanner: false,
-      title: 'Mentor Mind',
-      theme: ThemeData.dark(
-        useMaterial3: true,
+    return Wiredash(
+      secret: 'RjKaEx8hRbFBbXr-M7Jz5CUg2KYs2sOA',
+      projectId: 'medical-5b2ykyx',
+      child: MaterialApp(
+        routes: {
+          'usercheck': (context) => UserCheck(),
+          '/': (context) => SplashScreen(),
+        },
+        debugShowCheckedModeBanner: false,
+        title: 'Mentor Mind',
+        theme: ThemeData.dark(
+          useMaterial3: true,
+        ),
+        // home: const HomePage(),
       ),
-      // home: const HomePage(),
     );
   }
 }

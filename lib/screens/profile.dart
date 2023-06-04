@@ -79,17 +79,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           name: name,
                         ),
                         const SizedBox(height: 20.0),
-                        ProfileMenu(
-                          press: () {
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (context) => ProfilePageNew(),
-                            //   ),
-                            // );
-                          },
-                          menuText: 'Account Settings',
-                          icon: CupertinoIcons.person_crop_circle,
-                        ),
+                        // ProfileMenu(
+                        //   press: () {
+                        //     // Navigator.of(context).push(
+                        //     //   MaterialPageRoute(
+                        //     //     builder: (context) => ProfilePageNew(),
+                        //     //   ),
+                        //     // );
+                        //   },
+                        //   menuText: 'Account Settings',
+                        //   icon: CupertinoIcons.person_crop_circle,
+                        // ),
                         ProfileMenu(
                           press: () {
                             Navigator.of(context).push(MaterialPageRoute(
@@ -110,11 +110,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           menuText: "Requests",
                           icon: CupertinoIcons.arrow_left_right_circle,
                         ),
-                        ProfileMenu(
-                          press: () {},
-                          menuText: "Settings",
-                          icon: CupertinoIcons.settings,
-                        ),
+                        // ProfileMenu(
+                        //   press: () {},
+                        //   menuText: "Settings",
+                        //   icon: CupertinoIcons.settings,
+                        // ),
                         ProfileMenu(
                           press: () {
                             signOutUser();
@@ -124,8 +124,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         ProfileMenu(
                           press: () {
-                            // Wiredash.of(context)
-                            //     .show(inheritMaterialTheme: true);
+                            Wiredash.of(context)
+                                .show(inheritMaterialTheme: true);
                           },
                           menuText: "Help Center",
                           icon: CupertinoIcons.person_2,

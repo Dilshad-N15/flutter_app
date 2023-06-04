@@ -57,7 +57,7 @@ dependencies:
   provider: ^6.0.5
   url_launcher: ^6.1.11
   uuid: ^3.0.7
-  wiredash: ^1.5.0
+  wiredash: ^1.7.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0

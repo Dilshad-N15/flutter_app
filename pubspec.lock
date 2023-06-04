@@ -1014,10 +1014,10 @@ packages:
     dependency: "direct main"
     description:
       name: wiredash
-      sha256: "9e84429e74e2909662d565b8db17a10a5e6d81836b92cbcb4a97010e036194b5"
+      sha256: dd8faa10f2b46292cf4d8596094b158d929aa4f32cc8e7d02a3fa76d091d274d
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.7.0"
   xdg_directories:
     dependency: transitive
     description:

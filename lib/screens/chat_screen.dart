@@ -251,7 +251,19 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     bool _isrecording = recorder.isRecording;
     CollectionReference users = _firestore.collection('users');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 100), () {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    });
 
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
     return ChangeNotifierProvider(
       create: (_) => ChatState(),
       child: FutureBuilder<DocumentSnapshot>(
@@ -415,15 +427,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                         .snapshots(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot snapshot) {
-                                      SchedulerBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        _scrollController.jumpTo(
-                                            _scrollController
-                                                .position.maxScrollExtent);
-                                      });
                                       if (snapshot.data != null) {
                                         return ListView.builder(
-                                            controller: _scrollController,
                                             itemCount:
                                                 snapshot.data.docs.length,
                                             itemBuilder: (context, index) {
