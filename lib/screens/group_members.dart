@@ -264,25 +264,41 @@ class _GroupMembersState extends State<GroupMembers> {
             return Text('Error: ${snapshot.error}');
           }
           final userData = snapshot.data!;
+
           return Padding(
-            padding: EdgeInsets.all(6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(userData['name']),
-                // groupMembers[index].toString() == user.uid
-                !widget.isAdmin
-                    ? Container()
-                    : GestureDetector(
-                        onTap: () {
-                          removeFromGroup(groupMembers[index].toString());
-                        },
-                        child: Icon(
-                          Icons.remove,
-                          color: Colors.red,
-                        ),
+            padding: EdgeInsets.all(16),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Color.fromARGB(255, 190, 190, 190),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      userData['name'],
+                      style: TextStyle(
+                        color: Colors.black,
                       ),
-              ],
+                    ),
+                    // groupMembers[index].toString() == user.uid
+
+                    !widget.isAdmin
+                        ? Container()
+                        : GestureDetector(
+                            onTap: () {
+                              removeFromGroup(groupMembers[index].toString());
+                            },
+                            child: Icon(
+                              Icons.remove,
+                              color: Colors.red,
+                            ),
+                          ),
+                  ],
+                ),
+              ),
             ),
           );
         });

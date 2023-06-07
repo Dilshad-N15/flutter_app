@@ -240,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                                             .data()
                                                         as Map<String, dynamic>;
 
-                                                if (data['uid'] != user.uid) {
+                                                if (data['uid'] != user.uid &&
+                                                    data['mentor'] == "") {
                                                   return GestureDetector(
                                                     onTap: () {
                                                       Navigator.of(context)

@@ -24,7 +24,6 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
   Future updateFile() async {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
     final user = FirebaseAuth.instance.currentUser!;
-    // String requestID = const Uuid().v1();
     DocumentSnapshot userSnapshot =
         await _firestore.collection('users').doc(user.uid).get();
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
@@ -38,6 +37,7 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
       name: name,
       date: _selectedValue,
       type: selectedRadioButton,
+      link: _linkController.text,
       amount: _amountController.text,
       requestID: widget.dSnap['requestID'],
       datetime: DateTime.now(),
@@ -71,6 +71,8 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
   final _topicController = TextEditingController();
   final _noteController = TextEditingController();
   final _amountController = TextEditingController();
+  final _linkController = TextEditingController();
+
   var _selectedSubject = '';
   String selectedRadioButton = 'Theory';
   bool _isOther = false;
@@ -284,7 +286,7 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
                         ),
                         TextField(
                           maxLines: 3,
-                          maxLength: 100,
+                          maxLength: 200,
                           controller: _noteController,
                           decoration: InputDecoration(
                             hintText: widget.dSnap['description'],
@@ -325,6 +327,32 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
                               ),
                             ),
                             labelText: 'Amount',
+                            labelStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 18,
+                        ),
+                        TextField(
+                          controller: _linkController,
+                          textInputAction: TextInputAction.done,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFC31DC7),
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: BorderSide(
+                                color: Color(0xFFC31DC7),
+                              ),
+                            ),
+                            labelText: 'Project link(optional)',
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -416,7 +444,7 @@ class _RequestUpadatePageState extends State<RequestUpadatePage> {
                               },
                               child: Center(
                                 child: Text(
-                                  'Next',
+                                  'Update',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),

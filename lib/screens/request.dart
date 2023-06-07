@@ -279,7 +279,7 @@ class _RequestPageState extends State<RequestPage> {
                         ),
                         TextField(
                           maxLines: 3,
-                          maxLength: 100,
+                          maxLength: 200,
                           controller: _noteController,
                           decoration: InputDecoration(
                             focusedBorder: OutlineInputBorder(
