@@ -38,7 +38,7 @@ dependencies:
   date_picker_timeline: ^1.2.3
   dropdown_search: ^5.0.5
   emoji_selector: ^0.0.5
-  firebase_auth: ^4.2.5
+  firebase_auth: ^4.9.0
   firebase_core: ^2.4.1
   firebase_storage: ^11.0.14
   flutter:
